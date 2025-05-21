@@ -8,6 +8,10 @@ export const createAppealSchema: Schema = {
     notEmpty: {
       errorMessage: 'Text is required',
     },
+    isLength: {
+      options: { min: 5, max: 500 },
+      errorMessage: 'Text must be between 5 and 500 characters',
+    },
   },
   topic: {
     isString: {
@@ -15,6 +19,10 @@ export const createAppealSchema: Schema = {
     },
     notEmpty: {
       errorMessage: 'Topic is required',
+    },
+    isLength: {
+      options: { min: 3, max: 100 },
+      errorMessage: 'Topic must be between 3 and 100 characters',
     },
   },
 };
@@ -26,6 +34,10 @@ export const commentAppealSchema: Schema = {
     },
     notEmpty: {
       errorMessage: 'Comment is required',
+    },
+    isLength: {
+      options: { min: 5, max: 300 },
+      errorMessage: 'Comment must be between 5 and 300 characters',
     },
   },
 };
