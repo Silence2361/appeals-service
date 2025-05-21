@@ -5,10 +5,16 @@ export class ApiError {
   protected message: string;
 
   constructor(error: any, status: number, code?: string, message?: string) {
-    this.error = error?.message || '';
     this.status = status;
     this.code = code || this.getCode(status);
-    this.message = message || error?.message || this.getMessage(status);
+
+    if (typeof error === 'string') {
+      this.error = error;
+      this.message = message || error;
+    } else {
+      this.error = error?.message || JSON.stringify(error) || '';
+      this.message = message || error?.message || this.getMessage(status);
+    }
   }
 
   private getCode = (status: number) => {
