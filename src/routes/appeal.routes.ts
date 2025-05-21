@@ -1,64 +1,47 @@
 import express, { Router } from 'express';
 import { checkSchema } from 'express-validator';
-import {
-    createAppealHandler,
-    takeAppealHandler,
-    completeAppealHandler,
-    cancelAppealHandler,
-    getAppealsHandler,
-    cancelAllInProgressHandler,
-    deleteAppealHandler,
-} from '../controllers/appeal.controller';
-import {
-    createAppealSchema,
-    completeAppealSchema,
-    cancelAppealSchema,
-    getAppealsSchema,
-} from './validation-schemas/appeal-schema';
+import * as AppealController from '../controllers/appeal.controller';
+import * as AppealSchema from '../validation/schemas/appeal-schema';
 import { validate } from '../middlewares/validate';
-
+import { checkAppealExists } from '../data/check-appeal-exists';
 
 const appealRouter: Router = express.Router();
 
 appealRouter.post(
-    '/',
-    checkSchema(createAppealSchema),
-    validate,
-    createAppealHandler
+  '/',
+  checkSchema(AppealSchema.createAppealSchema),
+  validate,
+  AppealController.createAppeal
+);
+
+appealRouter.patch('/:id/take', checkAppealExists, AppealController.takeAppeal);
+
+appealRouter.patch(
+  '/:id/complete',
+  checkSchema(AppealSchema.commentAppealSchema),
+  validate,
+  checkAppealExists,
+  AppealController.completeAppeal
 );
 
 appealRouter.patch(
-    '/:id/take',
-    takeAppealHandler
-);
-
-appealRouter.patch(
-    '/:id/complete',
-    checkSchema(completeAppealSchema),
-    validate,
-    completeAppealHandler
-);
-
-appealRouter.patch(
-    '/:id/cancel',
-    checkSchema(cancelAppealSchema),
-    validate,
-    cancelAppealHandler
+  '/:id/cancel',
+  checkSchema(AppealSchema.commentAppealSchema),
+  validate,
+  checkAppealExists,
+  AppealController.cancelAppeal
 );
 
 appealRouter.get(
-    '/',
-    checkSchema(getAppealsSchema),
-    validate,
-    getAppealsHandler
+  '/',
+  checkSchema(AppealSchema.getAppealsSchema),
+  validate,
+  AppealController.findAppeals
 );
 appealRouter.post(
-    '/cancel-all-in-progress',
-    cancelAllInProgressHandler
+  '/cancel-all-in-progress',
+  AppealController.cancelAllInProgress
 );
-appealRouter.delete(
-    '/:id',
-    deleteAppealHandler
-);
+appealRouter.delete('/:id', checkAppealExists, AppealController.deleteAppeal);
 
 export { appealRouter };

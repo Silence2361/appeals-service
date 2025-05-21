@@ -1,69 +1,81 @@
-import {
-    createAppealRepo,
-    updateAppealByIdRepo,
-    findAppealsRepo,
-    cancelAllInProgressAppealsRepo,
-    deleteAppealRepo,
-} from '../repositories/appeal.repository';
-import { ApiError } from '../errors/api-error';
-import { validateObjectId } from '../utils/validate-object-id';
+import * as AppealRepo from '../repositories/appeal.repository';
 import { AppealDocument, AppealStatus } from '../models/appeal.model';
+import * as AppealTypes from '../types/appeal.types';
 
-export const createAppeal = async (text: string, topic: string): Promise<AppealDocument> => {
-    return createAppealRepo({ text, topic });
+export const createAppeal = async (
+  createAppealParams: AppealTypes.CreateAppealParams
+): Promise<AppealDocument> => {
+  return AppealRepo.createAppeal(createAppealParams);
 };
 
-export const takeAppeal = async (id: string): Promise<AppealDocument> => {
-    validateObjectId(id, 'Appeal ID');
+export const takeAppeal = async (
+  takeAppealParams: AppealTypes.TakeAppealParams
+): Promise<AppealDocument | null> => {
+  const { id } = takeAppealParams;
 
-    const appeal = await updateAppealByIdRepo(id, { status: AppealStatus.IN_PROGRESS });
-    if (!appeal) throw new ApiError(null, 404, undefined, 'Appeal not found');
+  const appeal = await AppealRepo.updateAppealById(id, {
+    status: AppealStatus.IN_PROGRESS,
+  });
 
-    return appeal;
+  return appeal;
 };
 
-export const completeAppeal = async (id: string, completionComment: string): Promise<AppealDocument> => {
-    validateObjectId(id, 'Appeal ID');
+export const completeAppeal = async (
+  completeAppealParams: AppealTypes.CompleteAppealParams
+): Promise<AppealDocument | null> => {
+  const { id, comment } = completeAppealParams;
 
-    const appeal = await updateAppealByIdRepo(id, {
-        status: AppealStatus.COMPLETED,
-        completionComment,
-    });
+  const appeal = await AppealRepo.updateAppealById(id, {
+    status: AppealStatus.COMPLETED,
+    comment,
+  });
 
-    if (!appeal) throw new ApiError(null, 404, undefined, 'Appeal not found');
-    return appeal;
+  return appeal;
 };
 
-export const cancelAppeal = async (id: string, cancelComment: string): Promise<AppealDocument> => {
-    validateObjectId(id, 'Appeal ID');
+export const cancelAppeal = async (
+  cancelAppealParams: AppealTypes.CancelAppealParams
+): Promise<AppealDocument | null> => {
+  const { id, comment } = cancelAppealParams;
 
-    const appeal = await updateAppealByIdRepo(id, {
-        status: AppealStatus.CANCELLED,
-        cancelComment,
-    });
+  const appeal = await AppealRepo.updateAppealById(id, {
+    status: AppealStatus.CANCELLED,
+    comment,
+  });
 
-    if (!appeal) throw new ApiError(null, 404, undefined, 'Appeal not found');
-    return appeal;
+  return appeal;
 };
 
-export const getAppeals = async (from?: string, to?: string): Promise<AppealDocument[]> => {
-    const filter: Record<string, any> = {};
+export const findAppeals = async (
+  findAppealsParams: AppealTypes.FindAppealsParams
+): Promise<AppealTypes.AppealPlain[]> => {
+  const { from, to } = findAppealsParams;
 
-    if (from || to) {
-        filter.createdAt = {};
-        if (from) filter.createdAt.$gte = new Date(from);
-        if (to) filter.createdAt.$lte = new Date(to);
-    }
+  const filter: AppealTypes.FindAppealsFilter = {};
 
-    return findAppealsRepo(filter);
+  if (from || to) {
+    filter.createdAt = {};
+
+    if (from) filter.createdAt.$gte = new Date(from);
+
+    if (to) filter.createdAt.$lte = new Date(to);
+  }
+
+  return AppealRepo.findAppeals(filter);
 };
 
-export const cancelAllInProgress = async (): Promise<{ modifiedCount: number }> => {
-    const result = await cancelAllInProgressAppealsRepo();
-    return { modifiedCount: result.modifiedCount };
+export const cancelAllInProgress = async (): Promise<{
+  modifiedCount: number;
+}> => {
+  const result = await AppealRepo.cancelAllInProgressAppeals();
+
+  return { modifiedCount: result.modifiedCount };
 };
 
-export const deleteAppeal = async (id: string): Promise<void> => {
-    validateObjectId(id, 'Appeal ID');
-    await deleteAppealRepo(id);
+export const deleteAppeal = async (
+  deleteAppealParams: AppealTypes.DeleteAppealParams
+): Promise<void> => {
+  const { id } = deleteAppealParams;
+
+  await AppealRepo.deleteAppeal(id);
 };

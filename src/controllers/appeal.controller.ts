@@ -1,53 +1,69 @@
 import { Request, Response } from 'express';
-import {
-    createAppeal,
-    takeAppeal,
-    completeAppeal,
-    cancelAppeal,
-    getAppeals,
-    cancelAllInProgress,
-    deleteAppeal,
-} from '../services/appeal.service';
-import { CreateAppealDto } from './dto/create-appeal.dto';
-import { GetAppealsDto } from './dto/get-appeals.dto';
-import { CompleteAppealDto } from './dto/complete-appeal.dto';
-import { CancelAppealDto } from './dto/cancel-appeal.dto';
+import * as AppealService from '../services/appeal.service';
+import * as AppealDto from '../controllers/dto/appeal.dto';
+import { catchAsync } from '../utils/catch-async';
 
-export const createAppealHandler = async (req: Request<{}, {}, CreateAppealDto>, res: Response) => {
+export const createAppeal = catchAsync(
+  async (req: Request<{}, {}, AppealDto.CreateAppealDto>, res: Response) => {
     const { text, topic } = req.body;
-    const appeal = await createAppeal(text, topic);
+    const appeal = await AppealService.createAppeal({ text, topic });
     res.status(201).json(appeal);
-};
+  }
+);
 
-export const takeAppealHandler = async (req: Request<{ id: string }>, res: Response) => {
-    const appeal = await takeAppeal(req.params.id);
-    res.status(200).json(appeal);
-};
+export const takeAppeal = catchAsync(
+  async (req: Request<{ id: string }>, res: Response) => {
+    const appeal = await AppealService.takeAppeal({ id: req.params.id });
+    res.json(appeal);
+  }
+);
 
-export const completeAppealHandler = async (req: Request<{ id: string }, {}, CompleteAppealDto>, res: Response) => {
-    const { completionComment } = req.body;
-    const appeal = await completeAppeal(req.params.id, completionComment);
-    res.status(200).json(appeal);
-};
+export const completeAppeal = catchAsync(
+  async (
+    req: Request<{ id: string }, {}, AppealDto.CompleteAppealDto>,
+    res: Response
+  ) => {
+    const { comment } = req.body;
+    const appeal = await AppealService.completeAppeal({
+      id: req.params.id,
+      comment,
+    });
+    res.json(appeal);
+  }
+);
 
-export const cancelAppealHandler = async (req: Request<{ id: string }, {}, CancelAppealDto>, res: Response) => {
-    const { cancelComment } = req.body;
-    const appeal = await cancelAppeal(req.params.id, cancelComment);
-    res.status(200).json(appeal);
-};
+export const cancelAppeal = catchAsync(
+  async (
+    req: Request<{ id: string }, {}, AppealDto.CancelAppealDto>,
+    res: Response
+  ) => {
+    const { comment } = req.body;
+    const appeal = await AppealService.cancelAppeal({
+      id: req.params.id,
+      comment,
+    });
+    res.json(appeal);
+  }
+);
 
-export const getAppealsHandler = async (req: Request<{}, {}, {}, GetAppealsDto>, res: Response) => {
+export const findAppeals = catchAsync(
+  async (req: Request<{}, {}, {}, AppealDto.GetAppealsDto>, res: Response) => {
     const { from, to } = req.query;
-    const appeals = await getAppeals(from, to);
-    res.status(200).json(appeals);
-};
+    const appeals = await AppealService.findAppeals({ from, to });
+    res.json(appeals);
+  }
+);
 
-export const cancelAllInProgressHandler = async (_req: Request, res: Response) => {
-    const result = await cancelAllInProgress();
-    res.status(200).json({ modifiedCount: result.modifiedCount });
-};
+export const cancelAllInProgress = catchAsync(
+  async (_req: Request, res: Response) => {
+    const result = await AppealService.cancelAllInProgress();
+    res.json({ modifiedCount: result.modifiedCount });
+  }
+);
 
-export const deleteAppealHandler = async (req: Request<{ id: string }>, res: Response) => {
-    await deleteAppeal(req.params.id);
+export const deleteAppeal = catchAsync(
+  async (req: Request<{ id: string }>, res: Response) => {
+    await AppealService.deleteAppeal({ id: req.params.id });
     res.status(204).send();
-};
+  }
+);
