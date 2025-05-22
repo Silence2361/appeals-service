@@ -3,7 +3,7 @@ import { checkSchema } from 'express-validator';
 import * as AppealController from '../controllers/appeal.controller';
 import * as AppealSchema from '../validation/schemas/appeal-schema';
 import { validate } from '../middlewares/validate';
-import { checkAppealExists } from '../middlewares/check-appeal-exists';
+import { checkAppealExists } from '../validation/data/check-appeal-exists';
 
 const appealRouter: Router = express.Router();
 
