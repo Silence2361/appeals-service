@@ -1,5 +1,5 @@
 import { model, Schema } from 'mongoose';
-import { AppealPlain } from '../types/appeal.types';
+import { AppealDocument } from '../types/appeal.types';
 
 export enum AppealStatus {
   NEW = 'new',
@@ -7,8 +7,6 @@ export enum AppealStatus {
   COMPLETED = 'completed',
   CANCELLED = 'cancelled',
 }
-
-export type AppealDocument = AppealPlain & Document;
 
 const appealSchema = new Schema<AppealDocument>(
   {

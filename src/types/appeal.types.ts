@@ -11,6 +11,8 @@ export type AppealPlain = {
   updatedAt: Date;
 };
 
+export type AppealDocument = AppealPlain & Document;
+
 export type CreateAppealParams = {
   text: string;
   topic: string;
